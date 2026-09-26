@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>VL-ADK Demo - ShellHacks 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -60,6 +61,10 @@
         <video id="cam" autoplay playsinline muted></video>
         <canvas id="overlay"></canvas>
         <div class="video-fallback" id="fallback">Waiting for camera permission…</div>
+        <div id="minimap" class="minimap">
+          <div class="minimap-title">LOCAL MAP <span id="miniCoords">MIAMI, FL</span></div>
+          <div id="map"></div>
+        </div>
       </div>
     </section>
 
@@ -108,6 +113,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

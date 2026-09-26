@@ -85,6 +85,29 @@ kbd{
 }
 .video-fallback.hide{display:none}
 
+.minimap{
+  position:absolute; left:10px; bottom:10px;
+  width:240px; height:180px;
+  border:1px solid var(--accent); background:#000;
+  box-shadow:0 0 12px rgba(57,255,136,.25);
+  z-index:5; display:flex; flex-direction:column;
+}
+.minimap-title{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:4px 8px; font-size:10px; color:var(--accent);
+  letter-spacing:.15em; background:#0a120a;
+  border-bottom:1px solid var(--line);
+}
+.minimap-title span{color:var(--dim)}
+#map{flex:1; background:#050805}
+/* Dark-ify the leaflet tiles */
+.leaflet-tile{filter:hue-rotate(70deg) invert(1) brightness(.85) contrast(1.1) saturate(.6)}
+.leaflet-container{background:#050805}
+.leaflet-control-attribution{
+  background:rgba(0,0,0,.5)!important; color:#7ea87e!important; font-size:8px!important;
+}
+.leaflet-control-attribution a{color:#39ff88!important}
+
 .graph{
   display:flex; flex-direction:column; align-items:center; gap:10px;
   padding:16px 8px; color:var(--dim); position:relative;

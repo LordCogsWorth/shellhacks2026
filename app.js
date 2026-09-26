@@ -138,3 +138,30 @@ function drawLoop(){
 
 startCamera().then(loadModel);
 pushMsg('VL-ADK dashboard online.', 'bot');
+
+// --- Minimap (Leaflet + OSM), centered on Miami, tries geolocation ---
+const MIAMI = [25.7617, -80.1918];
+const map = L.map('map', { zoomControl:false, attributionControl:true }).setView(MIAMI, 13);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '© OSM'
+}).addTo(map);
+const meIcon = L.divIcon({
+  className:'me-icon',
+  html:'<div style="width:14px;height:14px;border-radius:50%;background:#39ff88;box-shadow:0 0 10px #39ff88;border:2px solid #04120a"></div>',
+  iconSize:[14,14], iconAnchor:[7,7]
+});
+const meMarker = L.marker(MIAMI, { icon: meIcon }).addTo(map);
+const miniCoords = document.getElementById('miniCoords');
+
+if (navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(pos => {
+    const { latitude:lat, longitude:lng } = pos.coords;
+    map.setView([lat,lng], 15);
+    meMarker.setLatLng([lat,lng]);
+    miniCoords.textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }, err => {
+    console.warn('geo denied, using Miami', err);
+  }, { enableHighAccuracy:true, timeout:5000 });
+}
+// keep tiles sized correctly after layout
+setTimeout(() => map.invalidateSize(), 300);
