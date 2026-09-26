@@ -73,34 +73,68 @@ function resizeOverlay(){
 }
 window.addEventListener('resize', resizeOverlay);
 
-// Fake YOLO-style boxes that gently drift, matching the demo aesthetic
-const boxes = [
-  { x:.30, y:.20, w:.22, h:.55, label:'person', conf:.92 },
-  { x:.58, y:.28, w:.14, h:.35, label:'person', conf:.83 },
-  { x:.72, y:.32, w:.10, h:.28, label:'person', conf:.64 },
-];
+// Real-time object detection via COCO-SSD
+let model = null;
+let latestPredictions = [];
+
+async function loadModel(){
+  pushMsg('Loading detector model…', 'bot');
+  try{
+    model = await cocoSsd.load({ base: 'lite_mobilenet_v2' });
+    pushMsg('Detector ready.', 'bot');
+    detectLoop();
+  }catch(err){
+    pushMsg('Model load failed: ' + err.message, 'bot');
+    console.error(err);
+  }
+}
+
+async function detectLoop(){
+  if (!model || video.readyState < 2){
+    return requestAnimationFrame(detectLoop);
+  }
+  try{
+    // Filter by active YOLO prompt chips (labels). If empty, show all.
+    const active = [...document.querySelectorAll('.chip')]
+      .map(c => c.firstChild.textContent.trim().toLowerCase());
+    const preds = await model.detect(video);
+    latestPredictions = active.length
+      ? preds.filter(p => active.includes(p.class.toLowerCase()))
+      : preds;
+  }catch(e){ console.error(e); }
+  requestAnimationFrame(detectLoop);
+}
+
 function drawLoop(){
   const W = overlay.width, H = overlay.height;
   ctx.clearRect(0,0,W,H);
   ctx.lineWidth = 2;
   ctx.strokeStyle = '#39ff88';
-  ctx.fillStyle = '#39ff88';
   ctx.font = '12px ui-monospace, monospace';
-  const t = performance.now()/1000;
-  boxes.forEach((b,i)=>{
-    const dx = Math.sin(t*0.6 + i)*0.005;
-    const dy = Math.cos(t*0.4 + i)*0.004;
-    const x=(b.x+dx)*W, y=(b.y+dy)*H, w=b.w*W, h=b.h*H;
-    ctx.strokeRect(x,y,w,h);
-    const tag = `${b.label} ${b.conf.toFixed(2)}`;
+
+  // Video is object-fit:cover → compute mapping from video px to canvas px
+  const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+  const scale = Math.max(W / vw, H / vh);
+  const dw = vw * scale, dh = vh * scale;
+  const ox = (W - dw) / 2, oy = (H - dh) / 2;
+
+  latestPredictions.forEach(p => {
+    const [x, y, w, h] = p.bbox;
+    const rx = ox + x * scale;
+    const ry = oy + y * scale;
+    const rw = w * scale;
+    const rh = h * scale;
+    ctx.strokeStyle = '#39ff88';
+    ctx.strokeRect(rx, ry, rw, rh);
+    const tag = `${p.class} ${p.score.toFixed(2)}`;
     const tw = ctx.measureText(tag).width + 8;
-    ctx.fillRect(x, y-16, tw, 16);
-    ctx.fillStyle = '#04120a';
-    ctx.fillText(tag, x+4, y-4);
     ctx.fillStyle = '#39ff88';
+    ctx.fillRect(rx, ry - 16, tw, 16);
+    ctx.fillStyle = '#04120a';
+    ctx.fillText(tag, rx + 4, ry - 4);
   });
   requestAnimationFrame(drawLoop);
 }
 
-startCamera();
+startCamera().then(loadModel);
 pushMsg('VL-ADK dashboard online.', 'bot');
