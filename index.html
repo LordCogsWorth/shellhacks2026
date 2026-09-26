@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>VL-ADK Demo - ShellHacks 2026</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo">▮▮</span> VL-ADK</div>
+    <nav class="tabs">
+      <span class="tab active"><i class="dot"></i> YOLO Stream</span>
+      <span class="tab"><i class="dot"></i> ADK</span>
+    </nav>
+    <div class="top-actions">
+      <button class="btn danger" id="estop">EMERGENCY STOP</button>
+      <button class="btn ghost" id="reset">RESET SESSION</button>
+    </div>
+  </header>
+
+  <main class="grid">
+    <!-- LEFT COLUMN -->
+    <section class="col left">
+      <div class="panel">
+        <div class="panel-title">MANUAL CONTROLS</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">KEYBOARD CONTROLS <span class="ok">● OK</span></div>
+        <div class="keys">
+          <div><kbd>W</kbd> Forward</div><div><kbd>S</kbd> Backward</div>
+          <div><kbd>A</kbd> Turn Left</div><div><kbd>D</kbd> Turn Right</div>
+          <div><kbd>SPACE</kbd> Emergency Stop</div><div><kbd>ESC</kbd> Emergency Stop</div>
+        </div>
+        <label class="slider">LINEAR SPEED (FORWARD/BACKWARD)
+          <input type="range" min="0" max="1" step="0.01" value="0.5" id="lin"/>
+          <span class="val" id="linv">0.50</span>
+        </label>
+        <label class="slider">ANGULAR SPEED (TURNING)
+          <input type="range" min="0" max="1" step="0.01" value="0.5" id="ang"/>
+          <span class="val" id="angv">0.50</span>
+        </label>
+      </div>
+
+      <div class="panel grow">
+        <div class="panel-title">YOLO PROMPTS <span class="ok">● OK</span></div>
+        <div class="prompts" id="prompts">
+          <span class="chip">person <b>×</b></span>
+        </div>
+        <div class="prompt-input">
+          <input id="newPrompt" placeholder="add label (e.g. backpack) and press Enter"/>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTER -->
+    <section class="col center">
+      <div class="video-wrap">
+        <video id="cam" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <div class="video-fallback" id="fallback">Waiting for camera permission…</div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN -->
+    <section class="col right">
+      <div class="panel">
+        <nav class="subtabs">
+          <span class="tab active">AGENT GRAPH</span>
+          <span class="tab">RADAR</span>
+          <span class="tab">ROBOT DATA</span>
+        </nav>
+        <div class="graph">
+          <div class="node top">DIRECTOR</div>
+          <div class="arrow">│</div>
+          <div class="section-label">EXECUTION LOOP</div>
+          <div class="loop">
+            <div class="node">OBSERVER</div>
+            <div class="node">PILOT</div>
+          </div>
+          <div class="labels">
+            <span>WAITS</span><span>MOVE</span><br/>
+            <span>SORRY</span><span>ROTATE</span><br/>
+            <span></span><span>STOP</span>
+          </div>
+          <div class="node">UNTIL</div>
+          <div class="side-label">SANECOTA</div>
+        </div>
+      </div>
+
+      <div class="panel chat">
+        <div class="panel-title">CHAT
+          <span class="right-actions">
+            <button class="btn tiny">Text</button>
+            <button class="btn tiny primary">Audio</button>
+          </span>
+        </div>
+        <div class="chat-log" id="chatLog"></div>
+        <div class="chat-input">
+          <input id="chatBox" placeholder="Please give a squeeze with your palm, with your hand held out"/>
+          <button class="btn tiny" id="sendBtn">▶</button>
+        </div>
+        <div class="hint">Mic off: click on to start voice capture.</div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
