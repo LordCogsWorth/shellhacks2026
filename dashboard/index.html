@@ -24,26 +24,39 @@
     <!-- LEFT COLUMN -->
     <section class="col left">
       <div class="panel">
-        <div class="panel-title">MANUAL CONTROLS</div>
+        <div class="panel-title">MANUAL CONTROLS · TESTING</div>
+        <button class="btn manual-toggle" id="manual-toggle" aria-pressed="false" aria-controls="manual-keys">MANUAL OFF</button>
+        <p id="manual-hint" class="manual-hint" role="status">Testing only. Turn on to use arrow keys. Controls turn off when this window loses focus.</p>
       </div>
 
       <div class="panel">
         <div class="panel-title">KEYBOARD CONTROLS <span class="ok">● OK</span></div>
-        <div class="keys">
-          <div><kbd>W</kbd> Forward</div><div><kbd>S</kbd> Backward</div>
-          <div><kbd>A</kbd> Turn Left</div><div><kbd>D</kbd> Turn Right</div>
+        <div class="keys manual-disabled" id="manual-keys">
+          <div><kbd>↑</kbd> Forward</div><div><kbd>↓</kbd> Backward</div>
+          <div><kbd>←</kbd> Turn Left</div><div><kbd>→</kbd> Turn Right</div>
           <div><kbd>SPACE</kbd> Emergency Stop</div><div><kbd>ESC</kbd> Emergency Stop</div>
         </div>
         <label class="slider">LINEAR SPEED (FORWARD/BACKWARD)
-          <input type="range" min="0" max="1" step="0.01" value="0.5" id="lin"/>
-          <span class="val" id="linv">0.50</span>
+          <input type="range" min="0" max="1" step="0.01" value="0.75" id="lin"/>
+          <span class="val" id="linv">0.75</span>
         </label>
         <label class="slider">ANGULAR SPEED (TURNING)
-          <input type="range" min="0" max="1" step="0.01" value="0.5" id="ang"/>
-          <span class="val" id="angv">0.50</span>
+          <input type="range" min="0" max="1" step="0.01" value="0.75" id="ang"/>
+          <span class="val" id="angv">0.75</span>
         </label>
       </div>
 
+      <div class="panel navigation-panel" aria-label="Walking route planner">
+        <div class="panel-title">WALKING PATHS · PREVIEW</div>
+        <p id="nav-status" role="status">Connecting to route planner…</p>
+        <div id="nav-presets"></div>
+        <p id="nav-summary">Ask chat for a saved destination.</p>
+        <p id="nav-warning">Supervised prototype. Routes do not start the motors or establish safe crossings.</p>
+        <button class="btn" id="nav-replan">Refresh walking route</button>
+        <button class="btn danger" id="nav-review">Hazard reviewed — clear route hold</button>
+        <details><summary>Walking directions</summary><ol id="nav-steps"></ol></details>
+        <p><a href="navigation-info.html">Privacy, terms and setup</a></p>
+      </div>
       <div class="panel grow">
         <div class="panel-title">YOLO PROMPTS <span class="ok">● OK</span></div>
         <div class="prompts" id="prompts">
@@ -59,10 +72,13 @@
     <section class="col center">
       <div class="video-wrap">
         <video id="cam" autoplay playsinline muted></video>
+        <img id="camImg" alt="robot camera" />
         <canvas id="overlay"></canvas>
         <div class="video-fallback" id="fallback">Waiting for camera permission…</div>
         <div id="minimap" class="minimap">
           <div class="minimap-title">LOCAL MAP <span id="miniCoords">MIAMI, FL</span></div>
+          <div class="minimap-hud" id="miniHud">Ask chat for a preset destination</div>
+          <div class="memory-legend"><span id="memory-count">Saved map pins</span><span id="memory-status" role="status"></span></div>
           <div id="map"></div>
         </div>
       </div>
@@ -101,9 +117,10 @@
             <button class="btn tiny primary">Audio</button>
           </span>
         </div>
+        <div class="chat-examples">Try “add Monster to my things” or “set here as my home”.</div>
         <div class="chat-log" id="chatLog"></div>
         <div class="chat-input">
-          <input id="chatBox" placeholder="Please give a squeeze with your palm, with your hand held out"/>
+          <input id="chatBox" placeholder="Add Monster to my things…"/>
           <button class="btn tiny" id="sendBtn">▶</button>
         </div>
         <div class="hint">Mic off: click on to start voice capture.</div>
@@ -115,5 +132,9 @@
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+  <script src="dog.js"></script>
+  <script src="navigation.js"></script>
+  <script src="vendor/jsQR.js"></script>
+  <script src="objects.js"></script>
 </body>
 </html>

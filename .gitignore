@@ -1,0 +1,11 @@
+pi/navigation.env
+pi/bridge.env
+pi/data/
+pi/*.sqlite3
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+firmware/backup-*/
+firmware/build/
+deployment-evidence/

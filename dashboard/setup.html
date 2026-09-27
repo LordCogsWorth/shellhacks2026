@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Connect iPhone GPS</title>
+<style>body{font:18px/1.6 system-ui;background:#101710;color:#e5f5e5;max-width:650px;margin:40px auto;padding:20px}a{color:#73efaa}li{margin:18px 0}code{overflow-wrap:anywhere}h1{line-height:1.2}</style></head>
+<body><h1>Connect iPhone GPS</h1><p>Keep the Pi connected to this iPhone’s hotspot. Follow these steps in Safari.</p>
+<ol><li><a href="/setup/ca.crt">Download the robot’s certificate</a>. Allow the profile download.</li>
+<li>Open Settings → General → VPN &amp; Device Management. Install <strong>Guide Dog Robot Local CA</strong>.</li>
+<li>Open Settings → General → About → Certificate Trust Settings. Enable full trust for <strong>Guide Dog Robot Local CA</strong>. This trusts certificates issued by this robot’s private certificate authority; only do this for your own robot.</li>
+<li><a id="gps">Open the secure GPS page</a>. Tap <strong>Start GPS</strong> and allow location access. Keep the page open.</li></ol>
+<p id="state">Checking bridge…</p><p><a href="/">Dashboard</a> · <a href="/health">Connection details</a></p>
+<script>document.getElementById('gps').href=`https://${location.hostname}:8443/phone.html`;fetch('/health').then(r=>r.json()).then(h=>document.getElementById('state').textContent=`Bridge online. HTTPS ${h.https_configured?'configured':'not configured yet'}. Arduino ${h.arduino_connected?'connected':'offline'}. Camera ${h.camera_connected?'streaming':'waiting'}.`).catch(()=>document.getElementById('state').textContent='Cannot reach the bridge.');</script></body></html>

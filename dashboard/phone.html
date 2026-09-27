@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>Guide Dog — Phone Camera + GPS</title>
+<style>
+  :root{--bg:#0d0f0d;--ink:#e6ffe6;--dim:#8fb58f;--accent:#39ff88;--bad:#ff5a5a;--warn:#ffcc00}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:var(--bg);color:var(--ink);
+       font:18px/1.4 -apple-system,system-ui,sans-serif;padding:24px 16px env(safe-area-inset-bottom)}
+  h1{font-size:22px;margin:0 0 4px;color:var(--accent);letter-spacing:.04em}
+  .sub{color:var(--dim);font-size:15px;margin-bottom:20px}
+  button{width:100%;min-height:88px;font-size:26px;font-weight:800;border-radius:18px;border:0;
+         background:var(--accent);color:#04120a;margin:8px 0}
+  button.stop{background:#2a0d0d;color:var(--bad);border:2px solid var(--bad)}
+  .card{border:1px solid #1e2a1e;border-radius:14px;padding:14px 16px;margin:12px 0;background:#111512}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:4px 0}
+  .row span:first-child{color:var(--dim)}
+  .big{font-size:30px;font-weight:800}
+  .ok{color:var(--accent)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  label{display:flex;align-items:center;gap:12px;font-size:18px;padding:8px 0}
+  input[type=checkbox]{width:28px;height:28px}
+</style>
+</head>
+<body>
+  <h1>🐕‍🦺 GUIDE DOG · PHONE CAMERA + GPS</h1>
+  <div class="sub">Keep this page open with the screen on. Share this iPhone’s camera and location with the robot. Mount it facing forward for driving.</div>
+
+  <p id="setup-help"><a style="color:#39ff88" href="/setup.html">First time? Set up secure GPS access</a></p>
+  <button id="start">Start GPS</button>
+
+  <div class="card" aria-live="polite">
+    <div class="row"><span>Status</span><span id="status" class="big warn">Not started</span></div>
+    <div class="row"><span>Robot link</span><span id="link" class="bad">offline</span></div>
+    <div class="row"><span>Accuracy</span><span id="acc">—</span></div>
+    <div class="row"><span>Position</span><span id="pos">—</span></div>
+    <div class="row"><span>Updates sent</span><span id="sent">0</span></div>
+  </div>
+
+  <button id="camera-start">Start camera</button>
+  <div class="card">
+    <video id="preview" autoplay muted playsinline style="width:100%;max-height:260px;background:#000" aria-label="Phone camera preview"></video>
+    <p id="camera-status" role="status">Camera off</p>
+  </div>
+  <div class="card">
+    <label><input type="checkbox" id="speak" checked /> Speak robot alerts on this phone</label>
+  </div>
+
+  <button id="estop" class="stop" aria-label="Emergency stop the robot">STOP ROBOT</button>
+
+<script>
+const $ = id => document.getElementById(id);
+let ws = null, watchId = null, sent = 0, wakeLock = null, gpsPoll = null, polling = false;
+
+function connect(){
+  ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`);
+  ws.onopen  = () => { $('link').textContent = 'connected'; $('link').className = 'ok'; };
+  ws.onclose = () => { $('link').textContent = 'offline — retrying'; $('link').className = 'bad';
+                       setTimeout(connect, 2000); };
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'gps_ack'){ $('link').textContent = 'GPS received by Pi'; $('link').className = 'ok'; }
+    if (m.type === 'object_event') speak(`${m.name} ${m.kind === 'rediscovered' || m.kind === 'moved' ? 'found again' : 'remembered'} at ${m.zone}.`);
+    if (m.type === 'bark') speak('Woof! ' + m.label + ' nearby.');
+    if (m.type === 'telemetry') (m.alerts || []).forEach(a =>
+      speak(a.includes('OBSTACLE') ? 'Stop. Obstacle ahead.' : 'Robot connection lost.'));
+  };
+}
+connect();
+
+function speak(text){
+  if (!$('speak').checked || !('speechSynthesis' in window)) return;
+  speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+}
+
+function send(obj){
+  if (ws && ws.readyState === 1){ ws.send(JSON.stringify(obj)); return true; }
+  return false;
+}
+
+async function keepAwake(){
+  try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) { /* older iOS: set Auto-Lock to Never */ }
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && (watchId !== null || cameraStream)) keepAwake();
+  else if (watchId !== null) { $('status').textContent = 'Paused — reopen page'; $('status').className = 'big bad'; }
+});
+
+$('start').addEventListener('click', () => {
+  if (watchId !== null){                       // tap again = stop sharing
+    navigator.geolocation.clearWatch(watchId); watchId = null;
+    clearInterval(gpsPoll); gpsPoll = null;
+    if (wakeLock && !cameraStream) wakeLock.release();
+    $('start').textContent = 'Start GPS';
+    $('status').textContent = 'Stopped'; $('status').className = 'big warn';
+    return;
+  }
+  if (!window.isSecureContext){
+    $('status').textContent = 'Needs HTTPS'; $('status').className = 'big bad';
+    speak('This page must be opened with H T T P S.');
+    return;
+  }
+  speak('GPS starting.');                      // also unlocks speech on iOS (needs a tap)
+  keepAwake();
+  $('start').textContent = 'Stop sharing';
+  $('status').textContent = 'Waiting for GPS…';
+  const gotPosition = p => {
+    if (watchId === null) return;
+    const { latitude: lat, longitude: lon, accuracy: acc } = p.coords;
+    $('pos').textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+    $('acc').textContent = `± ${Math.round(acc)} m`;
+    const good = acc <= 25;
+    $('status').textContent = ws?.readyState === 1 ? (good ? 'Sharing ✓' : 'Weak signal') : 'Robot offline';
+    $('status').className = 'big ' + (good ? 'ok' : 'warn');
+    if (send({ type: 'phone_gps', lat, lon, acc })) $('sent').textContent = ++sent;
+  };
+  const gpsError = err => {
+    $('status').textContent = err.code === 1 ? 'Location denied' : 'GPS error';
+    $('status').className = 'big bad';
+    speak(err.code === 1 ? 'Location permission denied. Check Safari settings.' : 'GPS error.');
+  };
+  const gpsOptions = { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 };
+  watchId = navigator.geolocation.watchPosition(gotPosition, gpsError, gpsOptions);
+  // Request fresh fixes even when stationary; do not relabel cached fixes as new.
+  gpsPoll = setInterval(() => {
+    if (polling || watchId === null || document.visibilityState !== 'visible') return;
+    polling = true;
+    navigator.geolocation.getCurrentPosition(p => { polling = false; gotPosition(p); },
+      err => { polling = false; gpsError(err); }, gpsOptions);
+  }, 3000);
+});
+
+let cameraStream = null, cameraTimer = null, cameraBusy = false, cameraFrames = 0;
+const cameraCanvas = document.createElement('canvas');
+const cameraContext = cameraCanvas.getContext('2d');
+async function shareFrame(){
+  if (!cameraStream || cameraBusy || document.visibilityState !== 'visible') return;
+  const video = $('preview');
+  if (video.readyState < 2 || !video.videoWidth) return;
+  cameraBusy = true;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const scale = Math.min(1, 640 / Math.max(video.videoWidth, video.videoHeight));
+    cameraCanvas.width = Math.round(video.videoWidth * scale);
+    cameraCanvas.height = Math.round(video.videoHeight * scale);
+    cameraContext.drawImage(video, 0, 0, cameraCanvas.width, cameraCanvas.height);
+    const frame = await new Promise(resolve => cameraCanvas.toBlob(resolve, 'image/jpeg', 0.65));
+    if (!frame || !cameraStream) return;
+    const response = await fetch('/camera/frame', {method:'POST', headers:{'Content-Type':'image/jpeg'}, body:frame, signal:controller.signal});
+    if (!response.ok) throw new Error('Pi rejected frame (' + response.status + ')');
+    if (cameraStream) $('camera-status').textContent = `Camera sharing · ${++cameraFrames} frames received by Pi`;
+  } catch (error) {
+    if (cameraStream) $('camera-status').textContent = 'Camera link interrupted — retrying: ' + error.message;
+  } finally { clearTimeout(timeout); cameraBusy = false; }
+}
+function stopCamera(){
+  clearInterval(cameraTimer);
+  cameraStream?.getTracks().forEach(track => track.stop());
+  cameraStream = null;
+  $('preview').srcObject = null;
+  $('camera-start').textContent = 'Start camera';
+  $('camera-status').textContent = 'Camera off';
+  if (watchId === null && wakeLock) wakeLock.release();
+}
+$('camera-start').addEventListener('click', async () => {
+  if (cameraStream) { stopCamera(); return; }
+  $('camera-start').disabled = true;
+  try {
+    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) throw new Error('Open this page over HTTPS to use the camera');
+    cameraStream = await navigator.mediaDevices.getUserMedia({audio:false, video:{facingMode:{ideal:'environment'}, width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:5,max:10}}});
+    $('preview').srcObject = cameraStream;
+    await $('preview').play();
+    cameraStream.getVideoTracks()[0].addEventListener('ended', stopCamera);
+    $('camera-start').textContent = 'Stop camera';
+    $('camera-status').textContent = 'Camera starting…';
+    keepAwake();
+    cameraTimer = setInterval(shareFrame, 200);
+    shareFrame();
+  } catch (error) { stopCamera(); $('camera-status').textContent = error.message; }
+  finally { $('camera-start').disabled = false; }
+});
+window.addEventListener('pagehide', stopCamera);
+
+$('estop').addEventListener('click', () => { const ok = send({ type: 'estop' }); speak(ok ? 'Stop requested.' : 'Robot disconnected. Stop command could not be sent.'); });
+</script>
+</body>
+</html>

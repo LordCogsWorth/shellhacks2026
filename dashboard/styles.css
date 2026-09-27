@@ -75,7 +75,7 @@ kbd{
   position:relative; flex:1; background:#000;
   border:1px solid var(--line); overflow:hidden;
 }
-#cam, #overlay{
+#cam, #camImg, #overlay{
   position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
 }
 #overlay{pointer-events:none}
@@ -130,3 +130,67 @@ kbd{
 .chat-log .msg.bot{color:var(--accent)}
 .chat-input{display:flex; gap:6px}
 .hint{color:#556; font-size:10px; margin-top:6px; text-align:right}
+
+/* ---- guide-dog additions ---- */
+#camImg{display:none}
+.minimap{transition:width .25s, height .25s}
+.minimap.big{width:520px; height:380px}
+.minimap-title{cursor:pointer}
+.minimap-hud{padding:3px 8px; font-size:10px; color:var(--ink); background:#081008; border-bottom:1px solid var(--line)}
+.heading-arrow{width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;
+  border-bottom:18px solid var(--accent); filter:drop-shadow(0 0 6px var(--accent)); transform-origin:50% 60%}
+.hazard-pin{font-size:16px; line-height:16px; text-shadow:0 0 6px #000}
+.video-wrap.barking{animation:shake .45s}
+.video-wrap.barking::after{content:"WOOF!"; position:absolute; top:18px; right:22px; z-index:6;
+  font-size:42px; font-weight:900; color:var(--warn); text-shadow:0 0 18px var(--danger)}
+@keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,2px)}40%{transform:translate(6px,-2px)}
+  60%{transform:translate(-4px,1px)}80%{transform:translate(4px,-1px)}}
+.robot-status{color:var(--dim); font-size:10px; margin-left:8px}
+.robot-status.on{color:var(--accent)}
+
+/* Route planning and uncertain observations */
+.navigation-panel{font-size:12px;line-height:1.5;flex-shrink:0}
+.navigation-panel p{margin:8px 0}
+.navigation-panel .btn{white-space:normal;line-height:1.4;margin:4px 0;width:100%}
+.navigation-panel a{color:var(--accent)}
+#nav-warning{color:var(--warn)}
+#nav-steps{max-height:140px;overflow:auto;padding-left:20px}
+#google-map{flex:1;min-height:120px;color:#111}
+.col.left{overflow-y:auto}
+
+.manual-toggle{border-radius:999px;padding:8px 16px;min-height:40px}
+.manual-toggle.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.manual-hint{font-size:12px;line-height:1.5;color:var(--dim);margin:10px 0 0}
+.manual-disabled{opacity:.5}
+
+.objects-panel{font-size:12px;line-height:1.5;flex-shrink:0}
+.object-local{display:block;font-size:9px;color:var(--dim);margin-top:4px}
+.object-sequence{display:flex;gap:10px;color:var(--accent);font-size:10px;margin:12px 0}
+.object-intro{color:var(--dim)}
+.object-form{display:flex;gap:5px;margin:7px 0}
+.object-form input{min-width:0;width:100%;padding:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.objects-panel a{color:var(--accent)}
+#object-scan{width:100%;margin-top:5px}
+#object-status{color:var(--dim);min-height:36px}
+#object-cards{max-height:520px;overflow:auto}
+.object-card{padding:12px 0;border-top:1px solid var(--line)}
+.object-card.selected{border-left:3px solid var(--accent);padding-left:9px}
+.object-card-top{display:flex;flex-direction:column;gap:3px}
+.object-badge{font-size:9px;color:var(--dim)}
+.object-badge.located{color:var(--accent)}
+.object-badge.missing{color:var(--warn)}
+.object-card img{width:100%;height:100px;object-fit:cover;margin-top:8px}
+.object-location{font-size:15px;margin:8px 0 3px}
+.object-card small{color:var(--dim);font-size:10px}
+.object-actions{display:flex;gap:5px;margin-top:8px}
+.object-actions .btn{font-size:10px;padding:7px}
+#object-history{max-height:160px;overflow:auto;padding-left:16px}
+.object-pin{color:#75d5ff;font-size:20px;text-shadow:0 0 3px #000}
+
+/* Saved things and places live on the map. */
+.memory-legend{display:flex;flex-wrap:wrap;gap:4px 12px;padding:5px 9px;background:#101b17;color:#b6cbbc;font-size:10px}
+#memory-status{color:#ffcf56}.memory-pin{background:none;border:0}.memory-pin svg{width:36px;height:43px;filter:drop-shadow(0 2px 3px #0008)}
+.memory-popup{font:12px/1.4 sans-serif;color:#16231c;min-width:180px;max-width:240px}.memory-popup p{margin:6px 0}.memory-popup img{width:100%;max-height:110px;object-fit:cover;margin:6px 0}.memory-popup a{display:block;margin-top:6px}.memory-popup .btn{display:block;margin-top:8px;color:#132021;background:#e5eee8}
+.chat-examples{font-size:11px;color:#a4b8a9;padding:7px 12px}.place-choices{padding:10px;display:grid;gap:7px}.place-choices button{white-space:normal;text-align:left;padding:10px;background:#183125;color:#def4e6;border:1px solid #4d775e;border-radius:5px}
+
+.minimap{width:300px;height:240px}

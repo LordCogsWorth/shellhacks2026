@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 740" width="1400" height="740" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#C0392B"/>
+    </marker>
+    <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1F5FAD"/>
+    </marker>
+    <style>
+      .box{fill:#fff;stroke:#333;stroke-width:1.5}
+      .opt{fill:#fff;stroke:#888;stroke-width:1.5;stroke-dasharray:6 4}
+      .t{font-size:14px;font-weight:700;fill:#111}
+      .s{font-size:11px;fill:#444}
+      .zt{font-size:16px;font-weight:800;letter-spacing:.06em}
+      .data{stroke:#1F5FAD;stroke-width:2;fill:none}
+      .pwr{stroke:#C0392B;stroke-width:2.5;fill:none}
+      .wifi{stroke:#6A3FB5;stroke-width:2;fill:none;stroke-dasharray:7 5}
+      .lbl{font-size:11px;fill:#1F5FAD;font-weight:600}
+      .lblr{font-size:11px;fill:#C0392B;font-weight:600}
+      .lblw{font-size:11px;fill:#6A3FB5;font-weight:600}
+    </style>
+  </defs>
+
+  <rect width="1400" height="740" fill="#FAFAF7"/>
+  <text x="700" y="36" text-anchor="middle" font-size="22" font-weight="800" fill="#111">Guide-Dog Robot — Hardware &amp; Wiring (Zeus Car + Raspberry Pi 4)</text>
+
+  <!-- ZONES -->
+  <rect x="30" y="60" width="660" height="580" rx="14" fill="#EAF2FB" stroke="#7FA7D9" stroke-width="1.5"/>
+  <text x="50" y="86" class="zt" fill="#1F5FAD">THE BRAIN — Raspberry Pi 4 (5 V from power bank)</text>
+  <rect x="720" y="60" width="650" height="580" rx="14" fill="#FDF1E6" stroke="#E3A15E" stroke-width="1.5"/>
+  <text x="740" y="86" class="zt" fill="#B8651B">THE BODY — Zeus Car (7.4 V 2S battery)</text>
+
+  <!-- PI PERIPHERALS -->
+  <rect x="50" y="110" width="180" height="70" rx="8" class="box"/>
+  <text x="140" y="138" text-anchor="middle" class="t">USB-C Power Bank</text>
+  <text x="140" y="156" text-anchor="middle" class="s">5 V / 3 A (PD), ≥10,000 mAh</text>
+
+  <rect x="50" y="205" width="180" height="70" rx="8" class="box"/>
+  <text x="140" y="233" text-anchor="middle" class="t">Pi Camera Module 3</text>
+  <text x="140" y="251" text-anchor="middle" class="s">(wide) — replaces ESP32-CAM</text>
+
+  <rect x="50" y="300" width="180" height="70" rx="8" class="box" stroke="#6A3FB5"/>
+  <text x="140" y="328" text-anchor="middle" class="t">iPhone (GPS)</text>
+  <text x="140" y="346" text-anchor="middle" class="s">Safari phone.html · + hotspot</text>
+
+  <rect x="50" y="395" width="180" height="70" rx="8" class="box"/>
+  <text x="140" y="423" text-anchor="middle" class="t">Speaker</text>
+  <text x="140" y="441" text-anchor="middle" class="s">USB mini speaker (bark + voice)</text>
+
+  <rect x="50" y="490" width="180" height="70" rx="8" class="opt"/>
+  <text x="140" y="518" text-anchor="middle" class="t" fill="#555">Haptic handle</text>
+  <text x="140" y="536" text-anchor="middle" class="s">optional · vibration motor</text>
+
+  <!-- PI BOX -->
+  <rect x="280" y="110" width="230" height="360" rx="10" fill="#fff" stroke="#1F5FAD" stroke-width="2.5"/>
+  <text x="395" y="140" text-anchor="middle" class="t" font-size="16">Raspberry Pi 4</text>
+  <text x="395" y="158" text-anchor="middle" class="s">4 GB · Raspberry Pi OS 64-bit</text>
+  <line x1="295" y1="170" x2="495" y2="170" stroke="#ccd" />
+  <text x="300" y="192" class="s">• USB-C power in</text>
+  <text x="300" y="212" class="s">• CSI camera port</text>
+  <text x="300" y="232" class="s">• Wi-Fi ← iPhone GPS (HTTPS)</text>
+  <text x="300" y="252" class="s">• USB → speaker</text>
+  <text x="300" y="272" class="s">• USB → Arduino (serial)</text>
+  <text x="300" y="292" class="s">• Wi-Fi → dashboard</text>
+  <text x="300" y="312" class="s">• GPIO (spare: haptics)</text>
+  <line x1="295" y1="328" x2="495" y2="328" stroke="#ccd" />
+  <text x="300" y="350" class="s" font-weight="700">Runs:</text>
+  <text x="300" y="368" class="s">bridge.py (FastAPI + WebSocket)</text>
+  <text x="300" y="386" class="s">camera stream · phone GPS</text>
+  <text x="300" y="404" class="s">route follower · bark / TTS</text>
+  <text x="300" y="422" class="s">(optional) on-board YOLO</text>
+  <text x="300" y="440" class="s">serves the dashboard</text>
+
+  <!-- PI LINKS -->
+  <path d="M230,145 L278,145" class="pwr" marker-end="url(#arrR)"/>
+  <text x="254" y="138" text-anchor="middle" class="lblr">5V</text>
+  <path d="M230,240 L278,240" class="data" marker-end="url(#arrB)"/>
+  <text x="254" y="233" text-anchor="middle" class="lbl">CSI</text>
+  <path d="M230,335 L278,335" class="wifi" marker-end="url(#arr)"/>
+  <text x="254" y="328" text-anchor="middle" class="lblw">Wi-Fi</text>
+  <path d="M278,430 L232,430" class="data" marker-end="url(#arrB)"/>
+  <text x="254" y="423" text-anchor="middle" class="lbl">USB</text>
+  <path d="M278,460 L250,460 L250,525 L232,525" class="data" stroke-dasharray="5 4" marker-end="url(#arrB)"/>
+  <text x="262" y="500" class="lbl">GPIO</text>
+
+  <!-- LAPTOP -->
+  <rect x="280" y="540" width="230" height="80" rx="10" class="box" stroke="#6A3FB5"/>
+  <text x="395" y="570" text-anchor="middle" class="t">Laptop / Phone</text>
+  <text x="395" y="588" text-anchor="middle" class="s">Dashboard in browser (your repo)</text>
+  <text x="395" y="604" text-anchor="middle" class="s">video · minimap · chat · E-STOP</text>
+  <path d="M395,472 L395,538" class="wifi" marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <text x="405" y="500" class="lblw">Wi-Fi: HTTP + WebSocket</text>
+  <text x="405" y="515" class="lblw">+ MJPEG video</text>
+
+  <!-- PI <-> ARDUINO -->
+  <path d="M512,290 L758,290" class="data" stroke-width="3" marker-start="url(#arrB)" marker-end="url(#arrB)"/>
+  <text x="635" y="258" text-anchor="middle" class="lbl" font-size="12">USB cable (in kit)</text>
+  <text x="635" y="274" text-anchor="middle" class="lbl">Serial · 115200 baud</text>
+  <text x="635" y="310" text-anchor="middle" class="s">→ drive / stop / LED cmds</text>
+  <text x="635" y="326" text-anchor="middle" class="s">← sensor telemetry 10×/s</text>
+  <text x="635" y="352" text-anchor="middle" class="s" font-weight="700" fill="#B8651B">Shield switch → UPLOAD</text>
+  <text x="635" y="367" text-anchor="middle" class="s" fill="#B8651B">(frees serial for the Pi)</text>
+
+  <!-- BATTERY -->
+  <rect x="1080" y="100" width="265" height="52" rx="8" class="box"/>
+  <text x="1212" y="122" text-anchor="middle" class="t">2S Li-ion battery (kit)</text>
+  <text x="1212" y="140" text-anchor="middle" class="s">7.4 V nominal · charge via shield USB-C 5V/2A</text>
+  <path d="M1080,126 L885,126 L885,158" class="pwr" marker-end="url(#arrR)"/>
+  <text x="980" y="119" text-anchor="middle" class="lblr">PH2.0 · 6.6–8.4 V</text>
+
+  <!-- SHIELD -->
+  <rect x="760" y="160" width="250" height="450" rx="10" fill="#fff" stroke="#B8651B" stroke-width="2.5"/>
+  <text x="885" y="190" text-anchor="middle" class="t" font-size="16">SunFounder R3 (Uno)</text>
+  <text x="885" y="210" text-anchor="middle" class="t" font-size="15">+ Zeus Car Shield</text>
+  <line x1="775" y1="222" x2="995" y2="222" stroke="#edc" />
+  <text x="778" y="244" class="s" font-weight="700">Arduino pin map</text>
+  <text x="778" y="264" class="s">D3, D4, D5, D6, A0–A3 · 4 motors</text>
+  <text x="778" y="282" class="s">D10 · ultrasonic (trig = echo)</text>
+  <text x="778" y="300" class="s">D7, D8, D9 · 74HC165 (IR + gray)</text>
+  <text x="778" y="318" class="s">D11, D12, D13 · RGB strips</text>
+  <text x="778" y="336" class="s">D2 · IR remote receiver</text>
+  <text x="778" y="354" class="s">A4/A5 (I²C) · compass QMC6310</text>
+  <text x="778" y="372" class="s">D0/D1 (serial) · USB ↔ Pi</text>
+  <line x1="775" y1="388" x2="995" y2="388" stroke="#edc" />
+  <text x="778" y="410" class="s" font-weight="700">Runs guide_dog_firmware.ino:</text>
+  <text x="778" y="428" class="s">• mecanum motor mixing</text>
+  <text x="778" y="446" class="s">• reads sensors, sends telemetry</text>
+  <text x="778" y="464" class="s">• SAFETY: stops if obstacle &lt; 20 cm</text>
+  <text x="778" y="482" class="s">• SAFETY: stops if Pi goes silent</text>
+  <text x="778" y="500" class="s">  for 500 ms (watchdog)</text>
+  <text x="778" y="526" class="s">Switches: POWER · RUN/UPLOAD</text>
+  <text x="778" y="544" class="s">LEDs: charge (red), power (green),</text>
+  <text x="778" y="560" class="s">battery level (orange)</text>
+
+  <!-- ZEUS PERIPHERALS -->
+  <g>
+    <rect x="1080" y="170" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="192" class="t">4× TT motors + mecanum</text>
+    <text x="1095" y="209" class="s">LF · RF · RR · LR — 360° movement</text>
+    <path d="M1012,195 L1078,195" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="230" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="252" class="t">Ultrasonic (front)</text>
+    <text x="1095" y="269" class="s">distance ahead, ~2–400 cm · 4-pin</text>
+    <path d="M1078,255 L1012,255" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="290" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="312" class="t">IR obstacle L + R</text>
+    <text x="1095" y="329" class="s">near-object sensors on the corners</text>
+    <path d="M1078,315 L1012,315" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="350" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="372" class="t">Omni grayscale (bottom)</text>
+    <text x="1095" y="389" class="s">8 ground sensors — line / edge</text>
+    <path d="M1078,375 L1012,375" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="410" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="432" class="t">RGB strips (front + back)</text>
+    <text x="1095" y="449" class="s">status lights · "mood" · bark flash</text>
+    <path d="M1012,435 L1078,435" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="470" width="265" height="50" rx="8" class="box"/>
+    <text x="1095" y="492" class="t">Camera adapter board</text>
+    <text x="1095" y="509" class="s">KEEP IT — holds the compass (7-pin)</text>
+    <path d="M1078,495 L1012,495" class="data" marker-end="url(#arrB)"/>
+
+    <rect x="1080" y="530" width="265" height="50" rx="8" class="opt"/>
+    <text x="1095" y="552" class="t" fill="#666">ESP32-CAM</text>
+    <text x="1095" y="569" class="s">optional — unplug; Pi Camera replaces it</text>
+    <path d="M1080,555 L1062,555 L1062,520" stroke="#888" stroke-width="1.5" stroke-dasharray="5 4" fill="none"/>
+  </g>
+
+  <!-- LEGEND -->
+  <g transform="translate(40,672)">
+    <line x1="0" y1="0" x2="40" y2="0" class="pwr"/><text x="48" y="4" class="s">power</text>
+    <line x1="120" y1="0" x2="160" y2="0" class="data"/><text x="168" y="4" class="s">data / signal</text>
+    <line x1="270" y1="0" x2="310" y2="0" class="wifi"/><text x="318" y="4" class="s">wireless</text>
+    <rect x="390" y="-9" width="36" height="18" class="opt"/><text x="434" y="4" class="s">optional part</text>
+    <text x="560" y="4" class="s">Two separate power domains on purpose: motor noise on the car battery can't brown-out (reboot) the Pi.</text>
+    <text x="560" y="22" class="s">Only ground is shared, through the USB cable.</text>
+  </g>
+</svg>

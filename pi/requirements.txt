@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+pyserial
+pynmea2        # only for the optional NMEA-app GPS fallback
+# picamera2 comes from apt (sudo apt install python3-picamera2) —
+# create the venv with --system-site-packages so it is visible.

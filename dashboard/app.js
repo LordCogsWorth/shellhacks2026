@@ -32,10 +32,11 @@ function pushMsg(text, who='user'){
   d.textContent = (who==='user'?'> ':'◆ ') + text;
   chatLog.appendChild(d); chatLog.scrollTop = chatLog.scrollHeight;
 }
-function send(){
+async function send(){
   const t = chatBox.value.trim(); if(!t) return;
   pushMsg(t, 'user'); chatBox.value='';
-  setTimeout(()=>pushMsg('Acknowledged: '+t, 'bot'), 400);
+  if (window.NAV) await NAV.chat(t);
+  else pushMsg('Route planner is still loading. Please retry.', 'bot');
 }
 sendBtn.addEventListener('click', send);
 chatBox.addEventListener('keydown', e => { if(e.key==='Enter') send(); });
@@ -50,7 +51,30 @@ const overlay = document.getElementById('overlay');
 const fallback = document.getElementById('fallback');
 const ctx = overlay.getContext('2d');
 
+// When the page is served by the robot (bridge.py on port 8000) use the robot's camera,
+// otherwise use this computer's webcam (handy for testing without the robot).
+const ON_ROBOT = ['8000', '8443'].includes(location.port);
+const camImg = document.getElementById('camImg');
+const camSource = () => ON_ROBOT ? camImg : video;
+const camReady  = () => ON_ROBOT ? (camImg.naturalWidth > 0) : video.readyState >= 2;
+const camSize   = () => ON_ROBOT ? [camImg.naturalWidth, camImg.naturalHeight] : [video.videoWidth, video.videoHeight];
+
 async function startCamera(){
+  if (ON_ROBOT){
+    video.style.display = 'none';
+    camImg.style.display = 'block';
+    camImg.onerror = () => {
+      fallback.classList.remove('hide');
+      fallback.textContent = 'Robot camera disconnected — retrying…';
+      setTimeout(() => { camImg.src = '/video.mjpg?t=' + Date.now(); }, 3000);
+    };
+    camImg.src = '/video.mjpg';
+    setInterval(() => { if (camReady()) { fallback.classList.add('hide'); resizeOverlay(); } }, 1000);
+    fallback.textContent = 'Connecting to robot camera…';
+    camImg.addEventListener('load', () => { fallback.classList.add('hide'); resizeOverlay(); }, { once:true });
+    drawLoop();
+    return;
+  }
   try{
     const stream = await navigator.mediaDevices.getUserMedia({
       video: { width: {ideal:1280}, height:{ideal:720}, facingMode:'user' },
@@ -90,17 +114,18 @@ async function loadModel(){
 }
 
 async function detectLoop(){
-  if (!model || video.readyState < 2){
+  if (!model || !camReady()){
     return requestAnimationFrame(detectLoop);
   }
   try{
     // Filter by active YOLO prompt chips (labels). If empty, show all.
     const active = [...document.querySelectorAll('.chip')]
       .map(c => c.firstChild.textContent.trim().toLowerCase());
-    const preds = await model.detect(video);
+    const preds = await model.detect(camSource());
     latestPredictions = active.length
       ? preds.filter(p => active.includes(p.class.toLowerCase()))
       : preds;
+    if (window.DOG) DOG.onDetections(preds);   // bark / hazard pins use ALL detections
   }catch(e){ console.error(e); }
   requestAnimationFrame(detectLoop);
 }
@@ -113,7 +138,7 @@ function drawLoop(){
   ctx.font = '12px ui-monospace, monospace';
 
   // Video is object-fit:cover → compute mapping from video px to canvas px
-  const vw = video.videoWidth || 1, vh = video.videoHeight || 1;
+  const [cw, ch] = camSize(); const vw = cw || 1, vh = ch || 1;
   const scale = Math.max(W / vw, H / vh);
   const dw = vw * scale, dh = vh * scale;
   const ox = (W - dw) / 2, oy = (H - dh) / 2;
@@ -152,8 +177,9 @@ const meIcon = L.divIcon({
 });
 const meMarker = L.marker(MIAMI, { icon: meIcon }).addTo(map);
 const miniCoords = document.getElementById('miniCoords');
+if (ON_ROBOT) { meMarker.remove(); miniCoords.textContent = 'Waiting for iPhone GPS'; }
 
-if (navigator.geolocation){
+if (!ON_ROBOT && navigator.geolocation){
   navigator.geolocation.getCurrentPosition(pos => {
     const { latitude:lat, longitude:lng } = pos.coords;
     map.setView([lat,lng], 15);

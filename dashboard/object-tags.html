@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guide Dog — object labels</title>
+<style>body{font:17px/1.5 system-ui;margin:30px;color:#17271c;background:#f5f7f3}h1{font-size:28px}main{display:flex;flex-wrap:wrap;gap:24px}.label{background:white;border:1px solid #aaa;padding:28px;text-align:center;break-inside:avoid;width:260px}.qr{padding:16px;display:inline-block;background:white}.label h2{margin:4px 0}button,a{font:inherit;padding:10px}small{display:block;font-size:12px}#message{color:#804300}@media print{body{background:white;margin:0}.controls{display:none}.label{margin:8px;width:260px}}</style></head>
+<body><div class="controls"><h1>Labels for Grandma’s important things</h1><p>Print and attach each label to its matching object. Alternatively display one label on a second screen beside the item for a clearly labeled demo. Keep the white border visible.</p><p>In the dashboard, select the camera’s zone, start the scanner, and hold the label steady in the phone camera. Each label identifies one specific registered item.</p><button onclick="window.print()">Print labels</button> <a href="/">Back to dashboard</a><p id="message"></p></div><main id="labels"></main>
+<script src="vendor/qrcode.min.js"></script><script>
+fetch('/objects').then(r=>{if(!r.ok)throw new Error('Robot unavailable');return r.json()}).then(data=>{
+ for(const o of data.objects){
+  const card=document.createElement('section');card.className='label';
+  const title=document.createElement('h2');title.textContent=o.name;
+  const qr=document.createElement('div');qr.className='qr';
+  const note=document.createElement('small');note.textContent='Guide Dog · object identity label';
+  card.append(title,qr,note);document.getElementById('labels').append(card);
+  new QRCode(qr,{text:o.tag,width:224,height:224,correctLevel:QRCode.CorrectLevel.M});
+ }
+}).catch(e=>document.getElementById('message').textContent=e.message);
+</script></body></html>
